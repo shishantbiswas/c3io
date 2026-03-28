@@ -90,7 +90,7 @@ struct WriteContext
 
  @param loop: "Event loop to attach to"
 *>
-fn TcpConnection*? create(event_loop::EventLoop* loop) @public
+fn TcpConnection*? create(event_loop::EventLoop* loop)
 {
     // Allocate TCP handle
     uv::Tcp* handle = uv::alloc_handle(uv::Tcp, uv::HandleType.TCP);
@@ -101,7 +101,7 @@ fn TcpConnection*? create(event_loop::EventLoop* loop) @public
     {
         free(handle);
         io::printfn("Failed to initialize TCP handle: %s", (ZString)uv::strerror(result));
-        return TCP_INIT_FAILED?;
+        return TCP_INIT_FAILED~;
     }
 
     TcpConnection* conn = mem::new(TcpConnection);
@@ -143,13 +143,13 @@ fn void on_connect_internal(uv::Connect* req, int status)
  @param user_data: "User context passed to callback"
 *>
 fn TcpConnection*? connect(event_loop::EventLoop* loop, String host, ushort port,
-                            ConnectCallback callback, void* user_data = null) @public
+                            ConnectCallback callback, void* user_data = null)
 {
     // Create connection
     TcpConnection*? conn_opt = create(loop);
     if (catch err = conn_opt)
     {
-        return err?;
+        return err~;
     }
     TcpConnection* conn = conn_opt;
 
@@ -162,7 +162,7 @@ fn TcpConnection*? connect(event_loop::EventLoop* loop, String host, ushort port
         free(conn.handle);
         free(conn);
         io::printfn("Failed to parse address %s:%d: %s", host, port, (ZString)uv::strerror(result));
-        return TCP_ADDR_PARSE_FAILED?;
+        return TCP_ADDR_PARSE_FAILED~;
     }
 
     // Allocate connect request and context (freed in callback)
@@ -185,7 +185,7 @@ fn TcpConnection*? connect(event_loop::EventLoop* loop, String host, ushort port
         free(conn.handle);
         free(conn);
         io::printfn("Failed to initiate connect: %s", (ZString)uv::strerror(result));
-        return TCP_CONNECT_FAILED?;
+        return TCP_CONNECT_FAILED~;
     }
 
     return conn;
@@ -284,7 +284,7 @@ fn void on_read_internal(uv::Stream* stream, isz nread, uv::Buf* buf)
  @param user_data: "User context passed to callbacks"
 *>
 fn void? TcpConnection.start_read(&self, AllocCallback alloc_cb,
-                                   ReadCallback read_cb, void* user_data = null) @public
+                                   ReadCallback read_cb, void* user_data = null)
 {
     // Store callbacks in connection structure
     self.alloc_cb = alloc_cb;
@@ -299,7 +299,7 @@ fn void? TcpConnection.start_read(&self, AllocCallback alloc_cb,
 <*
  Stop reading from the connection.
 *>
-fn void? TcpConnection.stop_read(&self) @public
+fn void? TcpConnection.stop_read(&self)
 {
     int result = uv::read_stop((uv::Stream*)self.handle);
     uv::@uv_check(result, "Failed to stop reading", TCP_READ_FAILED)!;
@@ -336,7 +336,7 @@ fn void on_write_internal(uv::Write* req, int status)
  @param user_data: "User context passed to callback"
 *>
 fn void? TcpConnection.write(&self, char[] data, WriteCallback callback,
-                             void* user_data = null) @public
+                             void* user_data = null)
 {
     // Allocate write request and context (freed in callback)
     uv::Write* req = uv::alloc_req(uv::Write, uv::ReqType.WRITE);
@@ -364,7 +364,7 @@ fn void? TcpConnection.write(&self, char[] data, WriteCallback callback,
         free(ctx);
         free(req);
         io::printfn("Failed to write: %s", (ZString)uv::strerror(result));
-        return TCP_WRITE_FAILED?;
+        return TCP_WRITE_FAILED~;
     }
 }
 
@@ -388,7 +388,7 @@ fn void on_close_internal(uv::Handle* handle)
  This initiates async close - both handle and connection will be freed when close completes.
  DO NOT call free() or access the connection after calling close().
 *>
-fn void TcpConnection.close(&self) @public
+fn void TcpConnection.close(&self)
 {
     if (self.handle != null)
     {
@@ -402,7 +402,7 @@ fn void TcpConnection.close(&self) @public
 
  @param enable: "True to disable Nagle (send small packets immediately)"
 *>
-fn void? TcpConnection.set_nodelay(&self, bool enable) @public
+fn void? TcpConnection.set_nodelay(&self, bool enable)
 {
     int result = uv::tcp_nodelay(self.handle, enable ? 1 : 0);
     uv::@uv_check(result, "Failed to set TCP_NODELAY", TCP_INIT_FAILED)!;
@@ -414,7 +414,7 @@ fn void? TcpConnection.set_nodelay(&self, bool enable) @public
  @param enable: "True to enable keepalive"
  @param delay: "Initial delay in seconds (only used if enable is true)"
 *>
-fn void? TcpConnection.set_keepalive(&self, bool enable, uint delay = 60) @public
+fn void? TcpConnection.set_keepalive(&self, bool enable, uint delay = 60)
 {
     int result = uv::tcp_keepalive(self.handle, enable ? 1 : 0, delay);
     uv::@uv_check(result, "Failed to set TCP keepalive", TCP_INIT_FAILED)!;
@@ -469,7 +469,7 @@ fn void on_connection_internal(uv::Stream* server, int status)
  @param ip: "IP address to bind to (e.g., '0.0.0.0' for all interfaces)"
  @param port: "Port number to bind to"
 *>
-fn void? TcpConnection.bind(&self, String ip, ushort port) @public
+fn void? TcpConnection.bind(&self, String ip, ushort port)
 {
     uv::Sockaddr_in addr;
     ZString c_ip = (ZString)ip.ptr;
@@ -478,14 +478,14 @@ fn void? TcpConnection.bind(&self, String ip, ushort port) @public
     if (result != 0)
     {
         io::printfn("Failed to parse bind address %s:%d: %s", ip, port, (ZString)uv::strerror(result));
-        return TCP_ADDR_PARSE_FAILED?;
+        return TCP_ADDR_PARSE_FAILED~;
     }
 
     result = uv::tcp_bind(self.handle, (uv::Sockaddr*)&addr, 0);
     if (result != 0)
     {
         io::printfn("Failed to bind to %s:%d: %s", ip, port, (ZString)uv::strerror(result));
-        return TCP_INIT_FAILED?;
+        return TCP_INIT_FAILED~;
     }
 }
 
@@ -496,7 +496,7 @@ fn void? TcpConnection.bind(&self, String ip, ushort port) @public
  @param callback: "Called when a new connection arrives"
  @param user_data: "User context passed to callback"
 *>
-fn void? TcpConnection.listen(&self, int backlog, AcceptCallback callback, void* user_data = null) @public
+fn void? TcpConnection.listen(&self, int backlog, AcceptCallback callback, void* user_data = null)
 {
     self.accept_cb = callback;
     self.accept_user_data = user_data;
@@ -505,6 +505,6 @@ fn void? TcpConnection.listen(&self, int backlog, AcceptCallback callback, void*
     if (result != 0)
     {
         io::printfn("Failed to listen: %s", (ZString)uv::strerror(result));
-        return TCP_INIT_FAILED?;
+        return TCP_INIT_FAILED~;
     }
 }

@@ -133,7 +133,7 @@ fn void on_close_internal(uv::Handle* handle)
 
  @param loop : "Event loop to attach to"
 *>
-fn UdpSocket*? create(event_loop::EventLoop* loop) @public
+fn UdpSocket*? create(event_loop::EventLoop* loop)
 {
     // Allocate UDP handle
     uv::Udp* handle = uv::alloc_handle(uv::Udp, uv::HandleType.UDP);
@@ -144,7 +144,7 @@ fn UdpSocket*? create(event_loop::EventLoop* loop) @public
     {
         free(handle);
         io::printfn("Failed to initialize UDP handle: %s", (ZString)uv::strerror(result));
-        return UDP_INIT_FAILED?;
+        return UDP_INIT_FAILED~;
     }
 
     UdpSocket* socket = mem::new(UdpSocket);
@@ -167,7 +167,7 @@ fn UdpSocket*? create(event_loop::EventLoop* loop) @public
  @param ip : "IP address to bind to (e.g., 0.0.0.0 for any)"
  @param port : "Port number to bind to"
 *>
-fn void UdpSocket.bind(&self, String ip, int port) @public
+fn void UdpSocket.bind(&self, String ip, int port)
 {
     uv::Sockaddr_in addr;
     ZString c_ip = (ZString)ip.ptr;
@@ -196,7 +196,7 @@ fn void UdpSocket.bind(&self, String ip, int port) @public
  @param user_data : "User data passed to callback"
 *>
 fn void UdpSocket.send(&self, String ip, int port, char[] data,
-                       SendCallback callback, void* user_data) @public
+                       SendCallback callback, void* user_data)
 {
     SendContext* ctx = mem::new(SendContext);
     ctx.socket = self;
@@ -262,7 +262,7 @@ fn void UdpSocket.send(&self, String ip, int port, char[] data,
  @param user_data : "User data passed to callback"
 *>
 fn void UdpSocket.send_to(&self, uv::Sockaddr* addr, char[] data,
-                          SendCallback callback, void* user_data) @public
+                          SendCallback callback, void* user_data)
 {
     SendContext* ctx = mem::new(SendContext);
     ctx.socket = self;
@@ -309,7 +309,7 @@ fn void UdpSocket.send_to(&self, uv::Sockaddr* addr, char[] data,
  @param user_data : "User data passed to callbacks"
 *>
 fn void UdpSocket.recv_start(&self, AllocCallback alloc_cb, RecvCallback recv_cb,
-                             void* user_data) @public
+                             void* user_data)
 {
     self.alloc_cb = alloc_cb;
     self.recv_cb = recv_cb;
@@ -325,7 +325,7 @@ fn void UdpSocket.recv_start(&self, AllocCallback alloc_cb, RecvCallback recv_cb
 <*
  Stop receiving UDP datagrams.
 *>
-fn void UdpSocket.recv_stop(&self) @public
+fn void UdpSocket.recv_stop(&self)
 {
     uv::udp_recv_stop(self.handle);
 }
@@ -334,7 +334,7 @@ fn void UdpSocket.recv_stop(&self) @public
  Close the UDP socket and free resources.
  Note: This is async - the socket and handle will be freed when the close completes.
 *>
-fn void UdpSocket.close(&self) @public
+fn void UdpSocket.close(&self)
 {
     // Stop receiving first
     uv::udp_recv_stop(self.handle);

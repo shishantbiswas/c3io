@@ -1,23 +1,35 @@
 {
+  "$schema": "https://raw.githubusercontent.com/c3lang/c3c/refs/heads/master/resources/project_schema.json",
   "langrev": "1",
-  "authors": [
-    "Tristan Peralta <tristan@peralta.ph>",
-    "Claude Code <noreply@anthropic.com>"
-  ],
+  "authors":  [ "Tristan Peralta <tristan@peralta.ph>", "Claude Code <noreply@anthropic.com>" ],
   "version": "0.1.0",
-  "warnings": ["no-unused"],
-  "sources": ["dns.c3", "event_loop.c3", "file.c3", "tcp.c3", "timer.c3", "udp.c3", "uv.c3i", "work.c3"],
-  "test-sources": ["test/**"],
-  "output": ".",
+  "warnings":  [ "no-unused" ],
+  "sources":  [ 
+    "dns.c3",
+    "event_loop.c3",
+    "file.c3",
+    "tcp.c3",
+    "timer.c3",
+    "udp.c3",
+    "uv.c3i",
+    "work.c3"
+ ],
+  "test-sources":  [ "test/**" ],
+  "output": "build",
   "targets": {
     "c3io": {
       "type": "static-lib",
-      "linked-libraries": ["uv"]
+      "linked-libraries":  [ "uv" ]
     },
     "timer-example": {
       "type": "executable",
-      "sources": ["examples/timer_example.c3"],
-      "linked-libraries": ["uv"]
+      "sources":  [ "examples/timer_example.c3" ],
+      "linked-libraries":  [ "uv" ]
+    },
+    "http_server": {
+      "type": "executable",
+      "sources":  [ "examples/http_server.c3" ],
+      "linked-libraries":  [ "uv" ]
     }
   },
   "link-libc": true

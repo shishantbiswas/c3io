@@ -329,7 +329,7 @@ fn void on_scandir_internal(uv::Fs* req)
  @param user_data : "User data passed to callback"
 *>
 fn void open(event_loop::EventLoop* loop, String path, int flags, int mode,
-             OpenCallback callback, void* user_data) @public
+             OpenCallback callback, void* user_data)
 {
     OpenContext* ctx = mem::new(OpenContext);
     ctx.cb = callback;
@@ -359,7 +359,7 @@ fn void open(event_loop::EventLoop* loop, String path, int flags, int mode,
  @param user_data : "User data passed to callback"
 *>
 fn void FileHandle.read(&self, long offset, usz size,
-                        ReadCallback callback, void* user_data) @public
+                        ReadCallback callback, void* user_data)
 {
     ReadContext* ctx = mem::new(ReadContext);
     ctx.cb = callback;
@@ -392,7 +392,7 @@ fn void FileHandle.read(&self, long offset, usz size,
  @param user_data : "User data passed to callback"
 *>
 fn void FileHandle.write(&self, long offset, char[] data,
-                         WriteCallback callback, void* user_data) @public
+                         WriteCallback callback, void* user_data)
 {
     WriteContext* ctx = mem::new(WriteContext);
     ctx.cb = callback;
@@ -420,7 +420,7 @@ fn void FileHandle.write(&self, long offset, char[] data,
  @param callback : "Completion callback"
  @param user_data : "User data passed to callback"
 *>
-fn void FileHandle.close(&self, CloseCallback callback, void* user_data) @public
+fn void FileHandle.close(&self, CloseCallback callback, void* user_data)
 {
     CloseContext* ctx = mem::new(CloseContext);
     ctx.cb = callback;
@@ -452,7 +452,7 @@ fn void FileHandle.close(&self, CloseCallback callback, void* user_data) @public
  @param user_data : "User data passed to callback"
 *>
 fn void stat(event_loop::EventLoop* loop, String path,
-             StatCallback callback, void* user_data) @public
+             StatCallback callback, void* user_data)
 {
     StatContext* ctx = mem::new(StatContext);
     ctx.cb = callback;
@@ -482,7 +482,7 @@ fn void stat(event_loop::EventLoop* loop, String path,
  @param user_data : "User data passed to callback"
 *>
 fn void FileHandle.ftruncate(&self, long size,
-                             TruncateCallback callback, void* user_data) @public
+                             TruncateCallback callback, void* user_data)
 {
     TruncateContext* ctx = mem::new(TruncateContext);
     ctx.cb = callback;
@@ -508,7 +508,7 @@ fn void FileHandle.ftruncate(&self, long size,
  @param callback : "Completion callback"
  @param user_data : "User data passed to callback"
 *>
-fn void FileHandle.fsync(&self, FsyncCallback callback, void* user_data) @public
+fn void FileHandle.fsync(&self, FsyncCallback callback, void* user_data)
 {
     FsyncContext* ctx = mem::new(FsyncContext);
     ctx.cb = callback;
@@ -537,7 +537,7 @@ fn void FileHandle.fsync(&self, FsyncCallback callback, void* user_data) @public
  @param user_data : "User data passed to callback"
 *>
 fn void mkdir(event_loop::EventLoop* loop, String path, int mode,
-              MkdirCallback callback, void* user_data) @public
+              MkdirCallback callback, void* user_data)
 {
     MkdirContext* ctx = mem::new(MkdirContext);
     ctx.cb = callback;
@@ -569,7 +569,7 @@ fn void mkdir(event_loop::EventLoop* loop, String path, int mode,
  @param user_data : "User data passed to callback"
 *>
 fn void scandir(event_loop::EventLoop* loop, String path,
-                ScandirCallback callback, void* user_data) @public
+                ScandirCallback callback, void* user_data)
 {
     ScandirContext* ctx = mem::new(ScandirContext);
     ctx.cb = callback;
