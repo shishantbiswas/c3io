@@ -72,7 +72,7 @@ The test suite includes 30 tests covering all async modules.
 Add c3io as a submodule to your project:
 
 ```bash
-git submodule add https://github.com/YOUR_USERNAME/c3io.git lib/c3io
+git submodule add https://github.com/YOUR_USERNAME/c3io.git lib/c3io.c3l
 git submodule update --init --recursive
 ```
 
@@ -83,7 +83,7 @@ Add to your `project.json`:
 ```json
 {
   "dependencies": ["c3io"],
-  "dependency-search-paths": ["lib/c3io"]
+  "dependency-search-paths": ["lib/c3io.c3l"]
 }
 ```
 
