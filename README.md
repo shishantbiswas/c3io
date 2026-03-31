@@ -10,23 +10,23 @@ c3io is a standalone library that provides high-level async I/O primitives built
 
 ### High-Level Async Modules
 
-- **Event Loop** (`async::event_loop`) - Core event loop management
-- **TCP** (`async::tcp`) - Async TCP client and server operations
-- **UDP** (`async::udp`) - Async UDP socket operations
-- **Timer** (`async::timer`) - One-shot and periodic timers
-- **DNS** (`async::dns`) - Async DNS resolution
-- **File** (`async::file`) - Async file I/O operations
-- **Prepare** (`async::prepare`) - Handles that run before I/O polling
-- **Check** (`async::check`) - Handles that run after I/O polling
-- **Idle** (`async::idle`) - Handles that run when the loop is idle
-- **Async** (`async::async`) - Cross-thread communication handles
-- **Poll** (`async::poll`) - File descriptor polling handles
-- **Signal** (`async::signal`) - OS signal handling
-- **Process** (`async::process`) - Child process spawning and management
-- **Pipe** (`async::pipe`) - Unix domain socket and IPC operations
-- **TTY** (`async::tty`) - Terminal I/O operations
-- **FS Event** (`async::fs_event`) - Filesystem change monitoring
-- **FS Poll** (`async::fs_poll`) - Periodic filesystem polling
+- **Event Loop**    (`async::event_loop`) - Core event loop management
+- **TCP**           (`async::tcp`)        - Async TCP client and server operations
+- **UDP**           (`async::udp`)        - Async UDP socket operations
+- **Timer**         (`async::timer`)      - One-shot and periodic timers
+- **DNS**           (`async::dns`)        - Async DNS resolution
+- **File**          (`async::file`)       - Async file I/O operations
+- **Prepare**       (`async::prepare`)    - Handles that run before I/O polling
+- **Check**         (`async::check`)      - Handles that run after I/O polling
+- **Idle**          (`async::idle`)       - Handles that run when the loop is idle
+- **Async**         (`async::async`)      - Cross-thread communication handles
+- **Poll**          (`async::poll`)       - File descriptor polling handles
+- **Signal**        (`async::signal`)     - OS signal handling
+- **Process**       (`async::process`)    - Child process spawning and management
+- **Pipe**          (`async::pipe`)       - Unix domain socket and IPC operations
+- **TTY**           (`async::tty`)        - Terminal I/O operations
+- **FS Event**      (`async::fs_event`)   - Filesystem change monitoring
+- **FS Poll**       (`async::fs_poll`)    - Periodic filesystem polling
 
 - **Work Queue** (`async::work`) - Thread pool for CPU-intensive tasks
 
