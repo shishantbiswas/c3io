@@ -4,7 +4,7 @@ An async I/O library for C3 providing ergonomic wrappers around libuv for non-bl
 
 ## Overview
 
-c3io is a standalone library that provides high-level async I/O primitives built on top of libuv. It includes C3 bindings for libuv and offers an event-driven programming model with support for TCP, UDP, timers, DNS resolution, file operations, and work queue management.
+c3io is a standalone library that provides high-level async I/O primitives built on top of libuv. It includes comprehensive C3 bindings for libuv and offers an event-driven programming model with support for TCP, UDP, timers, DNS resolution, file operations, process management, signal handling, filesystem monitoring, and work queue management.
 
 ## Features
 
@@ -16,6 +16,18 @@ c3io is a standalone library that provides high-level async I/O primitives built
 - **Timer** (`async::timer`) - One-shot and periodic timers
 - **DNS** (`async::dns`) - Async DNS resolution
 - **File** (`async::file`) - Async file I/O operations
+- **Prepare** (`async::prepare`) - Handles that run before I/O polling
+- **Check** (`async::check`) - Handles that run after I/O polling
+- **Idle** (`async::idle`) - Handles that run when the loop is idle
+- **Async** (`async::async`) - Cross-thread communication handles
+- **Poll** (`async::poll`) - File descriptor polling handles
+- **Signal** (`async::signal`) - OS signal handling
+- **Process** (`async::process`) - Child process spawning and management
+- **Pipe** (`async::pipe`) - Unix domain socket and IPC operations
+- **TTY** (`async::tty`) - Terminal I/O operations
+- **FS Event** (`async::fs_event`) - Filesystem change monitoring
+- **FS Poll** (`async::fs_poll`) - Periodic filesystem polling
+
 - **Work Queue** (`async::work`) - Thread pool for CPU-intensive tasks
 
 ### Low-Level Bindings
@@ -63,7 +75,7 @@ This will create `c3io.a` in the build directory.
 c3c test
 ```
 
-The test suite includes 30 tests covering all async modules.
+The test suite includes 60+ tests covering all async modules.
 
 ## Usage
 
@@ -72,7 +84,7 @@ The test suite includes 30 tests covering all async modules.
 Add c3io as a submodule to your project:
 
 ```bash
-git submodule add https://github.com/YOUR_USERNAME/c3io.git lib/c3io.c3l
+git submodule add https://github.com/shishantbiswas/c3io.git lib/c3io.c3l
 git submodule update --init --recursive
 ```
 
