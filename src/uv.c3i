@@ -23,21 +23,33 @@ import std::io;
 // Opaque Types - Actual structs defined in libuv, we treat as opaque pointers
 // ============================================================================
 // Loop and handle types
-alias Loop = void; // uv_loop_t
-alias Handle = void; // uv_handle_t (use handle_get_data/handle_set_data)
-alias Stream = void; // uv_stream_t (base for TCP, pipe, etc.)
-alias Tcp = void; // uv_tcp_t
-alias Udp = void; // uv_udp_t
-alias Timer = void; // uv_timer_t
+// https://docs.libuv.org/en/v1.x/api.html
+alias Loop 		= void; // uv_loop_t
+alias Handle 	= void; // uv_handle_t (use handle_get_data/handle_set_data)
+alias Stream 	= void; // uv_stream_t (base for TCP, pipe, etc.)
+alias Tcp 		= void; // uv_tcp_t
+alias Udp 		= void; // uv_udp_t
+alias Timer 	= void; // uv_timer_t
+alias Prepare 	= void; // uv_prepare_t — Prepare handle
+alias Check 	= void; // uv_check_t — Check handle
+alias Idle  	= void; // uv_idle_t — Idle handle
+alias Async 	= void; // uv_async_t — Async handle
+alias Poll 		= void; // uv_poll_t — Poll handle
+alias Signal 	= void; // uv_signal_t — Signal handle
+alias Process	= void; // uv_process_t — Process handle
+alias Pipe		= void; // uv_pipe_t — Pipe handle
+alias Tty		= void; // uv_tty_t — TTY handle
+alias FSEvent	= void; // uv_fs_event_t — FS Event handle
+alias FSPoll	= void; // uv_fs_poll_t — FS Poll handle
 
 // Request types
-alias Req = void; // uv_req_t (use req_get_data/req_set_data)
-alias Connect = void; // uv_connect_t
-alias Write = void; // uv_write_t
-alias Shutdown = void; // uv_shutdown_t
-alias UdpSend = void; // uv_udp_send_t
-alias GetAddrInfo = void; // uv_getaddrinfo_t
-alias Work = void; // uv_work_t (thread pool work request)
+alias Req 			= void; // uv_req_t (use req_get_data/req_set_data)
+alias Connect 		= void; // uv_connect_t
+alias Write 		= void; // uv_write_t
+alias Shutdown 		= void; // uv_shutdown_t
+alias UdpSend 		= void; // uv_udp_send_t
+alias GetAddrInfo   = void; // uv_getaddrinfo_t
+alias Work 			= void; // uv_work_t (thread pool work request)
 
 // Filesystem request (uv_fs_t) - needs actual storage
 struct Fs
@@ -238,6 +250,30 @@ alias UdpSendCb = fn void(UdpSend* req, int status);
 
 // UDP receive callback - called when data is received on a UDP socket
 alias UdpRecvCb = fn void(Udp* handle, isz nread, Buf* buf, Sockaddr* addr, uint flags);
+
+// Prepare callback - called before I/O polling
+alias PrepareCb = fn void(Prepare* handle);
+
+// Check callback - called after I/O polling
+alias CheckCb = fn void(Check* handle);
+
+// Idle callback - called when loop is idle
+alias IdleCb = fn void(Idle* handle);
+
+// Async callback - called when async handle is sent
+alias AsyncCb = fn void(Async* handle);
+
+// Poll callback - called when polled fd has events
+alias PollCb = fn void(Poll* handle, int status, int events);
+
+// Signal callback - called when signal is received
+alias SignalCb = fn void(Signal* handle, int signum);
+
+// FS Event callback - called when filesystem changes occur
+alias FsEventCb = fn void(FSEvent* handle, char* filename, int events, int status);
+
+// FS Poll callback - called when filesystem polling detects changes
+alias FsPollCb = fn void(FSPoll* handle, int status, FileStat* prev, FileStat* curr);
 
 // Timer callback - called when a timer expires
 alias TimerCb = fn void(Timer* handle);
@@ -952,6 +988,357 @@ fn int udp_try_send(Udp* udp, Buf* bufs, uint nbufs, Sockaddr* addr) @extern("uv
 
 // UDP flags
 const uint UV_UDP_REUSEADDR = 4; // Allow reusing addresses
+
+// ============================================================================
+// Prepare Functions
+// ============================================================================
+
+/*
+  Initialize a prepare handle.
+  @param loop : "Event loop"
+  @param prepare : "Prepare handle to initialize"
+  @return "0 on success, negative error code on failure"
+*/
+fn int prepare_init(Loop* loop, Prepare* prepare) @extern("uv_prepare_init");
+
+/*
+  Start a prepare handle.
+  @param prepare : "Prepare handle"
+  @param cb : "Callback called before I/O polling"
+  @return "0 on success, negative error code on failure"
+*/
+fn int prepare_start(Prepare* prepare, PrepareCb cb) @extern("uv_prepare_start");
+
+/*
+  Stop a prepare handle.
+  @param prepare : "Prepare handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int prepare_stop(Prepare* prepare) @extern("uv_prepare_stop");
+
+// ============================================================================
+// Check Functions
+// ============================================================================
+
+/*
+  Initialize a check handle.
+  @param loop : "Event loop"
+  @param check : "Check handle to initialize"
+  @return "0 on success, negative error code on failure"
+*/
+fn int check_init(Loop* loop, Check* check) @extern("uv_check_init");
+
+/*
+  Start a check handle.
+  @param check : "Check handle"
+  @param cb : "Callback called after I/O polling"
+  @return "0 on success, negative error code on failure"
+*/
+fn int check_start(Check* check, CheckCb cb) @extern("uv_check_start");
+
+/*
+  Stop a check handle.
+  @param check : "Check handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int check_stop(Check* check) @extern("uv_check_stop");
+
+// ============================================================================
+// Idle Functions
+// ============================================================================
+
+/*
+  Initialize an idle handle.
+  @param loop : "Event loop"
+  @param idle : "Idle handle to initialize"
+  @return "0 on success, negative error code on failure"
+*/
+fn int idle_init(Loop* loop, Idle* idle) @extern("uv_idle_init");
+
+/*
+  Start an idle handle.
+  @param idle : "Idle handle"
+  @param cb : "Callback called when loop is idle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int idle_start(Idle* idle, IdleCb cb) @extern("uv_idle_start");
+
+/*
+  Stop an idle handle.
+  @param idle : "Idle handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int idle_stop(Idle* idle) @extern("uv_idle_stop");
+
+// ============================================================================
+// Async Functions
+// ============================================================================
+
+/*
+  Initialize an async handle.
+  @param loop : "Event loop"
+  @param async : "Async handle to initialize"
+  @param cb : "Callback called when async is sent"
+  @return "0 on success, negative error code on failure"
+*/
+fn int async_init(Loop* loop, Async* async, AsyncCb cb) @extern("uv_async_init");
+
+/*
+  Send a signal to an async handle.
+  Thread-safe - can be called from any thread.
+  @param async : "Async handle to send to"
+  @return "0 on success, negative error code on failure"
+*/
+fn int async_send(Async* async) @extern("uv_async_send");
+
+// ============================================================================
+// Poll Functions
+// ============================================================================
+
+/*
+  Initialize a poll handle.
+  @param loop : "Event loop"
+  @param poll : "Poll handle to initialize"
+  @param fd : "File descriptor to poll"
+  @return "0 on success, negative error code on failure"
+*/
+fn int poll_init(Loop* loop, Poll* poll, int fd) @extern("uv_poll_init");
+
+/*
+  Start polling a file descriptor.
+  @param poll : "Poll handle"
+  @param events : "Events to poll for"
+  @param cb : "Callback called when events occur"
+  @return "0 on success, negative error code on failure"
+*/
+fn int poll_start(Poll* poll, int events, PollCb cb) @extern("uv_poll_start");
+
+/*
+  Stop polling.
+  @param poll : "Poll handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int poll_stop(Poll* poll) @extern("uv_poll_stop");
+
+// ============================================================================
+// Signal Functions
+// ============================================================================
+
+/*
+  Initialize a signal handle.
+  @param loop : "Event loop"
+  @param signal : "Signal handle to initialize"
+  @return "0 on success, negative error code on failure"
+*/
+fn int signal_init(Loop* loop, Signal* signal) @extern("uv_signal_init");
+
+/*
+  Start listening for a signal.
+  @param signal : "Signal handle"
+  @param cb : "Callback called when signal is received"
+  @param signum : "Signal number"
+  @return "0 on success, negative error code on failure"
+*/
+fn int signal_start(Signal* signal, SignalCb cb, int signum) @extern("uv_signal_start");
+
+/*
+  Stop listening for signals.
+  @param signal : "Signal handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int signal_stop(Signal* signal) @extern("uv_signal_stop");
+
+// ============================================================================
+// TTY Functions
+// ============================================================================
+
+/*
+  Initialize a TTY handle.
+  @param loop : "Event loop"
+  @param tty : "TTY handle to initialize"
+  @param fd : "File descriptor"
+  @param readable : "Whether TTY should be readable (1) or writable (0)"
+  @return "0 on success, negative error code on failure"
+*/
+fn int tty_init(Loop* loop, Tty* tty, int fd, int readable) @extern("uv_tty_init");
+
+/*
+  Set TTY mode.
+  @param tty : "TTY handle"
+  @param mode : "TTY mode (0=normal, 1=raw)"
+  @return "0 on success, negative error code on failure"
+*/
+fn int tty_set_mode(Tty* tty, int mode) @extern("uv_tty_set_mode");
+
+/*
+  Reset TTY mode to normal.
+  Should be called before program exit.
+  @return "0 on success, negative error code on failure"
+*/
+fn int tty_reset_mode() @extern("uv_tty_reset_mode");
+
+/*
+  Get terminal window size.
+  @param tty : "TTY handle"
+  @param width : "Output parameter for width"
+  @param height : "Output parameter for height"
+  @return "0 on success, negative error code on failure"
+*/
+fn int tty_get_winsize(Tty* tty, int* width, int* height) @extern("uv_tty_get_winsize");
+
+// ============================================================================
+// FS Event Functions
+// ============================================================================
+
+/*
+  Initialize an FS event handle.
+  @param loop : "Event loop"
+  @param fs_event : "FS event handle to initialize"
+  @return "0 on success, negative error code on failure"
+*/
+fn int fs_event_init(Loop* loop, FSEvent* fs_event) @extern("uv_fs_event_init");
+
+/*
+  Start watching a filesystem path.
+  @param fs_event : "FS event handle"
+  @param cb : "Callback called when changes occur"
+  @param path : "Path to watch"
+  @param flags : "Watch flags"
+  @return "0 on success, negative error code on failure"
+*/
+fn int fs_event_start(FSEvent* fs_event, FsEventCb cb, char* path, uint flags) @extern("uv_fs_event_start");
+
+/*
+  Stop watching filesystem.
+  @param fs_event : "FS event handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int fs_event_stop(FSEvent* fs_event) @extern("uv_fs_event_stop");
+
+// ============================================================================
+// FS Poll Functions
+// ============================================================================
+
+/*
+  Initialize an FS poll handle.
+  @param loop : "Event loop"
+  @param fs_poll : "FS poll handle to initialize"
+  @return "0 on success, negative error code on failure"
+*/
+fn int fs_poll_init(Loop* loop, FSPoll* fs_poll) @extern("uv_fs_poll_init");
+
+/*
+  Start polling a filesystem path.
+  @param fs_poll : "FS poll handle"
+  @param cb : "Callback called when changes are detected"
+  @param path : "Path to poll"
+  @param interval : "Polling interval in milliseconds"
+  @return "0 on success, negative error code on failure"
+*/
+fn int fs_poll_start(FSPoll* fs_poll, FsPollCb callback, char* path, uint interval) @extern("uv_fs_poll_start");
+
+/*
+  Stop polling filesystem.
+  @param fs_poll : "FS poll handle"
+  @return "0 on success, negative error code on failure"
+*/
+fn int fs_poll_stop(FSPoll* fs_poll) @extern("uv_fs_poll_stop");
+
+// ============================================================================
+// Pipe Functions
+// ============================================================================
+
+/*
+  Initialize a pipe handle.
+  @param loop : "Event loop"
+  @param pipe : "Pipe handle to initialize"
+  @param ipc : "Whether pipe is for IPC (1) or not (0)"
+  @return "0 on success, negative error code on failure"
+*/
+fn int pipe_init(Loop* loop, Pipe* pipe, int ipc) @extern("uv_pipe_init");
+
+/*
+  Open an existing pipe file descriptor.
+  @param pipe : "Pipe handle"
+  @param file : "File descriptor"
+  @return "0 on success, negative error code on failure"
+*/
+fn int pipe_open(Pipe* pipe, int file) @extern("uv_pipe_open");
+
+/*
+  Bind pipe to a Unix domain socket.
+  @param pipe : "Pipe handle"
+  @param name : "Socket name"
+  @return "0 on success, negative error code on failure"
+*/
+fn int pipe_bind(Pipe* pipe, char* name) @extern("uv_pipe_bind");
+
+/*
+  Connect to a Unix domain socket.
+  @param req : "Connect request"
+  @param pipe : "Pipe handle"
+  @param name : "Socket name"
+  @param cb : "Connection callback"
+  @return "0 on success, negative error code on failure"
+*/
+fn int pipe_connect(Connect* req, Pipe* pipe, char* name, ConnectCb cb) @extern("uv_pipe_connect");
+
+/*
+  Get local socket name.
+  @param pipe : "Pipe handle"
+  @param buffer : "Output buffer"
+  @param size : "Buffer size"
+  @return "0 on success, negative error code on failure"
+*/
+fn int pipe_getsockname(Pipe* pipe, char* buffer, usz* size) @extern("uv_pipe_getsockname");
+
+/*
+  Get peer socket name.
+  @param pipe : "Pipe handle"
+  @param buffer : "Output buffer"
+  @param size : "Buffer size"
+  @return "0 on success, negative error code on failure"
+*/
+fn int pipe_getpeername(Pipe* pipe, char* buffer, usz* size) @extern("uv_pipe_getpeername");
+
+// ============================================================================
+// Process Functions
+// ============================================================================
+
+/*
+  Spawn a child process.
+  Note: This function signature is simplified. The actual uv_spawn
+  takes a uv_process_options_t structure which is complex.
+  @param loop : "Event loop"
+  @param process : "Process handle"
+  @param options : "Process options (placeholder)"
+  @return "PID on success, negative error code on failure"
+*/
+fn int spawn(Loop* loop, Process* process, void* options) @extern("uv_spawn");
+
+/*
+  Send a signal to a process.
+  @param process : "Process handle"
+  @param signum : "Signal number"
+  @return "0 on success, negative error code on failure"
+*/
+fn int process_kill(Process* process, int signum) @extern("uv_process_kill");
+
+/*
+  Get the process ID.
+  @param process : "Process handle"
+  @return "Process ID"
+*/
+fn int process_get_pid(Process* process) @extern("uv_process_get_pid");
+
+// ============================================================================
+// Poll Events
+// ============================================================================
+
+// Poll events
+const int UV_READABLE = 1;  // File descriptor is readable
+const int UV_WRITABLE = 2;  // File descriptor is writable
+const int UV_DISCONNECT = 4; // File descriptor was disconnected (Windows only)
 
 // ============================================================================
 // Timer Functions

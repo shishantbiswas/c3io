@@ -5,14 +5,7 @@
   "version": "0.1.0",
   "warnings":  [ "no-unused" ],
   "sources":  [ 
-    "dns.c3",
-    "event_loop.c3",
-    "file.c3",
-    "tcp.c3",
-    "timer.c3",
-    "udp.c3",
-    "uv.c3i",
-    "work.c3"
+    "src/*"
  ],
   "test-sources":  [ "test/**" ],
   "output": "build",
