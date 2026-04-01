@@ -1,6 +1,7 @@
 module async::prepare::test;
 
 import async::prepare;
+import async::timer;
 import async::event_loop;
 import std::io;
 
@@ -100,6 +101,80 @@ fn void test_stop_prepare() @test
 
     // Clean up
     prepare.close();
+
+    // Run loop until close completes
+    while (loop.is_alive())
+    {
+        loop.run_once();
+    }
+}
+
+// ============================================================================
+// Start Prepare Tests - Test that prepare callback actually fires
+// ============================================================================
+
+fn void on_timer_for_prepare(async::timer::Timer* timer, void* user_data)
+{
+    // Timer callback - just keep the loop running
+    // This will cause prepare callbacks to fire before I/O polling
+}
+
+fn void test_start_prepare() @test
+{
+    EventLoop? loop_opt = event_loop::create();
+    if (catch err = loop_opt)
+    {
+        assert(false, "Should create event loop");
+        return;
+    }
+    EventLoop loop = loop_opt;
+    defer loop.free();
+
+    TestContext ctx;
+    ctx.success = false;
+    ctx.completed = false;
+    ctx.call_count = 0;
+    ctx.loop = &loop;
+
+    // Create prepare handle
+    async::prepare::Prepare*? prepare_opt = async::prepare::create(&loop);
+    if (catch err = prepare_opt)
+    {
+        assert(false, "Should create prepare handle");
+        return;
+    }
+    async::prepare::Prepare* prepare = prepare_opt;
+
+    // Create a timer to generate loop activity
+    async::timer::Timer*? timer_opt = async::timer::create(&loop);
+    if (catch err = timer_opt)
+    {
+        assert(false, "Should create timer");
+        prepare.close();
+        return;
+    }
+    async::timer::Timer* timer = timer_opt;
+
+    // Start the prepare handle
+    prepare.start(&on_prepare_callback, &ctx);
+
+    // Start a repeating timer to keep the loop active and generate prepare callback firing
+    timer.start(10, 10, &on_timer_for_prepare, null);
+
+    // Run event loop until prepare callback fires enough times
+    while (!ctx.completed)
+    {
+        loop.run_once();
+    }
+
+    assert(ctx.success, "Prepare callback should fire");
+    assert(ctx.call_count >= 3, "Prepare callback should fire at least 3 times");
+
+    // Stop and clean up
+    prepare.stop();
+    timer.stop();
+    prepare.close();
+    timer.close();
 
     // Run loop until close completes
     while (loop.is_alive())

@@ -107,3 +107,56 @@ fn void test_stop_idle() @test
         loop.run_once();
     }
 }
+
+// ============================================================================
+// Start Idle Tests - Test that idle callback actually fires
+// ============================================================================
+
+fn void test_start_idle() @test
+{
+    EventLoop? loop_opt = event_loop::create();
+    if (catch err = loop_opt)
+    {
+        assert(false, "Should create event loop");
+        return;
+    }
+    EventLoop loop = loop_opt;
+    defer loop.free();
+
+    TestContext ctx;
+    ctx.success = false;
+    ctx.completed = false;
+    ctx.call_count = 0;
+    ctx.loop = &loop;
+
+    // Create idle handle
+    async::idle::Idle*? idle_opt = async::idle::create(&loop);
+    if (catch err = idle_opt)
+    {
+        assert(false, "Should create idle handle");
+        return;
+    }
+    async::idle::Idle* idle = idle_opt;
+
+    // Start the idle handle
+    idle.start(&on_idle_callback, &ctx);
+
+    // Run event loop until callback fires
+    while (!ctx.completed)
+    {
+        loop.run_once();
+    }
+
+    assert(ctx.success, "Idle callback should fire");
+    assert(ctx.call_count >= 3, "Idle callback should fire at least 3 times");
+
+    // Stop and clean up
+    idle.stop();
+    idle.close();
+
+    // Run loop until close completes
+    while (loop.is_alive())
+    {
+        loop.run_once();
+    }
+}

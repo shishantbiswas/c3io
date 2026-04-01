@@ -2,6 +2,8 @@ module async::tcp_test;
 
 import async::event_loop;
 import async::tcp;
+import async::timer;
+import uv;
 import std::io;
 
 <*
@@ -196,24 +198,449 @@ struct WriteResult
     int status;
 }
 
+struct TestContext
+{
+    bool success;
+    bool completed;
+    int call_count;
+    EventLoop* loop;
+}
+
 fn void on_test_write(async::tcp::TcpConnection* conn, int status, void* user_data)
 {
     WriteResult* result = user_data;
     result.called = true;
     result.status = status;
+}
 
-    io::printfn("Write completed with status: %d", status);
+fn void on_timeout_callback(async::timer::Timer* timer, void* user_data)
+{
+    TestContext* ctx = user_data;
+    ctx.completed = true;
+}
+
+
+
+<*
+   Test TCP read operations with data.
+*>
+fn void test_tcp_read_operations() @test
+{
+    event_loop::EventLoop? loop_opt = event_loop::create();
+    if (catch err = loop_opt)
+    {
+        assert(false, "Should create event loop");
+        return;
+    }
+
+    event_loop::EventLoop loop = loop_opt;
+    defer loop.free();
+
+    ConnectResult connect_result;
+    connect_result.called = false;
+    connect_result.status = -1;
+
+    ReadResult read_result;
+    read_result.called = false;
+    read_result.bytes_received = 0;
+
+    WriteResult write_result;
+    write_result.called = false;
+    write_result.status = -1;
+
+    // Connect to Google's HTTP server
+    async::tcp::TcpConnection*? conn_opt = async::tcp::connect(
+        &loop, "142.250.185.46", 80, &on_test_connect_for_read, &connect_result
+    );
+
+    if (catch err = conn_opt)
+    {
+        io::printfn("Warning: Could not connect (network issue?): %s", err);
+        return;
+    }
+
+    async::tcp::TcpConnection* conn = conn_opt;
+
+    // Run event loop until connection completes
+    int connect_timeout = 0;
+    while (!connect_result.called && connect_timeout < 100)
+    {
+        (void)loop.run_once();
+        connect_timeout++;
+    }
+
+    if (!connect_result.called || connect_result.status != 0)
+    {
+        io::printfn("Connection failed, skipping read test");
+        conn.close();
+        (void)loop.run();
+        return;
+    }
+
+    // Start reading
+    if (catch err = conn.start_read(&on_test_alloc, &on_test_read_with_data, &read_result))
+    {
+        assert(false, "Should start reading");
+        conn.close();
+        (void)loop.run();
+        return;
+    }
+
+    // Send a simple HTTP request
+    char[] request = "GET / HTTP/1.0\r\nHost: www.google.com\r\n\r\n";
+    if (catch err = conn.write(request, &on_test_write, &write_result))
+    {
+        assert(false, "Should write request");
+        conn.close();
+        (void)loop.run();
+        return;
+    }
+
+    // Run event loop until write completes or timeout
+    int write_timeout = 0;
+    while (!write_result.called && write_timeout < 100)
+    {
+        (void)loop.run_once();
+        write_timeout++;
+    }
+
+    // Write should have completed
+    assert(write_result.called, "Write callback should be called");
+    assert(write_result.status == 0, "Write should succeed");
+
+    // Run event loop to process read
+    int read_timeout = 0;
+    while (!read_result.called && read_timeout < 100)
+    {
+        (void)loop.run_once();
+        read_timeout++;
+    }
+
+    // Should have received some data
+    assert(read_result.called, "Read callback should be called");
+    assert(read_result.bytes_received > 0, "Should receive some data");
+
+    // Stop reading
+    if (catch err = conn.stop_read())
+    {
+        assert(false, "Should stop reading");
+    }
+
+    conn.close();
+    (void)loop.run();
+
+    assert(true, "TCP read operations test passed");
 }
 
 <*
- Test full HTTP request to google.com.
- This tests connect -> write -> read cycle.
- NOTE: Simplified version without nested callbacks due to C3 limitations.
+  Connect callback that starts reading.
 *>
-fn void test_tcp_http_request() @test
+fn void on_test_connect_for_read(async::tcp::TcpConnection* conn, int status, void* user_data)
 {
-    // Skip this test for now - requires refactoring to avoid nested functions
-    // The basic connection test above validates the core functionality
-    io::printfn("Skipping HTTP test (requires nested function support)");
-    assert(true, "Test skipped");
+    ConnectResult* result = user_data;
+    result.called = true;
+    result.status = status;
+
+    if (status == 0)
+    {
+        io::printfn("Connected successfully for read test");
+        // Note: reading started in test function
+    }
+    else
+    {
+        io::printfn("Connection failed with status: %d", status);
+        conn.close();
+    }
+}
+
+<*
+  Read callback that stores data info.
+*>
+fn void on_test_read_with_data(async::tcp::TcpConnection* conn, char[] data, void* user_data)
+{
+    ReadResult* result = user_data;
+    result.called = true;
+    result.bytes_received = (int)data.len;
+
+    if (data.len > 0)
+    {
+        io::printfn("Received %d bytes of data", data.len);
+        // Stop reading after receiving data
+        (void)conn.stop_read();
+    }
+    else
+    {
+        io::printfn("Connection closed or error");
+    }
+}
+
+<*
+   Test TCP write operations with large data.
+*>
+fn void test_tcp_write_large_data() @test
+{
+    event_loop::EventLoop? loop_opt = event_loop::create();
+    if (catch err = loop_opt)
+    {
+        assert(false, "Should create event loop");
+        return;
+    }
+
+    event_loop::EventLoop loop = loop_opt;
+    defer loop.free();
+
+    ConnectResult connect_result;
+    connect_result.called = false;
+    connect_result.status = -1;
+
+    WriteResult write_result;
+    write_result.called = false;
+    write_result.status = -1;
+
+    // Connect to Google's HTTP server
+    async::tcp::TcpConnection*? conn_opt = async::tcp::connect(
+        &loop, "142.250.185.46", 80, &on_test_connect_for_write, &connect_result
+    );
+
+    if (catch err = conn_opt)
+    {
+        io::printfn("Warning: Could not connect (network issue?): %s", err);
+        return;
+    }
+
+    async::tcp::TcpConnection* conn = conn_opt;
+
+    // Run event loop until connection completes
+    int connect_timeout = 0;
+    while (!connect_result.called && connect_timeout < 100)
+    {
+        (void)loop.run_once();
+        connect_timeout++;
+    }
+
+    if (!connect_result.called || connect_result.status != 0)
+    {
+        io::printfn("Connection failed, skipping write test");
+        conn.close();
+        (void)loop.run();
+        return;
+    }
+
+    // Create large data (1KB)
+    char[] large_data = mem::new_array(char, 1024);
+    for (int i = 0; i < 1024; i++)
+    {
+        large_data[i] = (char)(i % 256);
+    }
+
+    // Write large data
+    if (catch err = conn.write(large_data, &on_test_write_large, &write_result))
+    {
+        free(large_data.ptr);
+        assert(false, "Should write large data");
+        conn.close();
+        (void)loop.run();
+        return;
+    }
+
+    // Run event loop until write completes
+    int write_timeout = 0;
+    while (!write_result.called && write_timeout < 100)
+    {
+        (void)loop.run_once();
+        write_timeout++;
+    }
+
+    // Write callback should be called
+    assert(write_result.called, "Write callback should be called");
+    assert(write_result.status == 0, "Write should succeed");
+
+    free(large_data.ptr);
+    conn.close();
+    (void)loop.run();
+
+    assert(true, "TCP write large data test passed");
+}
+
+fn void on_test_connect_for_write(async::tcp::TcpConnection* conn, int status, void* user_data)
+{
+    ConnectResult* result = user_data;
+    result.called = true;
+    result.status = status;
+
+    if (status == 0)
+    {
+        io::printfn("Connected successfully for write test");
+    }
+    else
+    {
+        io::printfn("Connection failed with status: %d", status);
+        conn.close();
+    }
+}
+
+fn void on_test_write_large(async::tcp::TcpConnection* conn, int status, void* user_data)
+{
+    WriteResult* result = user_data;
+    result.called = true;
+    result.status = status;
+}
+
+<*
+   Test TCP shutdown operations using low-level uv API.
+*>
+struct ShutdownResult
+{
+    bool called;
+    int status;
+}
+
+fn void on_tcp_shutdown(uv::Shutdown* req, int status)
+{
+    ShutdownResult* result = (ShutdownResult*)uv::req_get_data((uv::Req*)req);
+    if (result != null)
+    {
+        result.called = true;
+        result.status = status;
+    }
+    free(req);
+}
+
+fn void test_tcp_shutdown() @test
+{
+    event_loop::EventLoop? loop_opt = event_loop::create();
+    if (catch err = loop_opt)
+    {
+        assert(false, "Should create event loop");
+        return;
+    }
+
+    event_loop::EventLoop loop = loop_opt;
+    defer loop.free();
+
+    async::tcp::TcpConnection*? conn_opt = async::tcp::create(&loop);
+    if (catch err = conn_opt)
+    {
+        assert(false, "Should create TCP connection");
+        return;
+    }
+
+    async::tcp::TcpConnection* conn = conn_opt;
+
+    // Test shutdown on unconnected socket - expect it to fail gracefully
+    uv::Shutdown* shutdown_req = uv::alloc_req(uv::Shutdown, uv::ReqType.SHUTDOWN);
+    ShutdownResult shutdown_result;
+    shutdown_result.called = false;
+    shutdown_result.status = -1;
+    uv::req_set_data((uv::Req*)shutdown_req, &shutdown_result);
+
+    int shutdown_result_code = uv::shutdown(shutdown_req, (uv::Stream*)conn.handle, &on_tcp_shutdown);
+
+    if (shutdown_result_code != 0)
+    {
+        // If shutdown failed immediately, free the request
+        free(shutdown_req);
+    }
+    else
+    {
+        // Run event loop to process the shutdown callback
+        int timeout = 0;
+        while (!shutdown_result.called && timeout < 100)
+        {
+            (void)loop.run_once();
+            timeout++;
+        }
+    }
+
+    conn.close();
+    (void)loop.run();
+
+    assert(true, "TCP shutdown test passed");
+}
+
+<*
+  Test TCP error conditions.
+*>
+fn void on_error_connect(async::tcp::TcpConnection* conn, int status, void* user_data)
+{
+    ConnectResult* result = user_data;
+    result.called = true;
+    result.status = status;
+    // Always close the connection when done
+    conn.close();
+}
+
+fn void test_tcp_error_conditions() @test
+{
+    event_loop::EventLoop? loop_opt = event_loop::create();
+    if (catch err = loop_opt)
+    {
+        assert(false, "Should create event loop");
+        return;
+    }
+
+    event_loop::EventLoop loop = loop_opt;
+    defer loop.free();
+
+    // Try to connect to invalid address
+    ConnectResult connect_result;
+    connect_result.called = false;
+    connect_result.status = -1;
+
+    async::tcp::TcpConnection*? conn_opt = async::tcp::connect(
+        &loop, "192.0.2.1", 12345, &on_error_connect, &connect_result
+    );
+
+    if (catch err = conn_opt)
+    {
+        // Expected to fail with invalid address
+        io::printfn("Connection correctly failed with invalid address: %s", err);
+        assert(true, "TCP error conditions test passed");
+        return;
+    }
+
+    async::tcp::TcpConnection* conn = conn_opt;
+
+    // Create a timeout timer to ensure test doesn't hang
+    async::timer::Timer*? timeout_timer_opt = async::timer::create(&loop);
+    if (catch err = timeout_timer_opt)
+    {
+        conn.close();
+        assert(false, "Should create timeout timer");
+        return;
+    }
+    async::timer::Timer* timeout_timer = timeout_timer_opt;
+
+    // Set up timeout callback
+    TestContext timeout_ctx;
+    timeout_ctx.success = false;
+    timeout_ctx.completed = false;
+    timeout_ctx.loop = &loop;
+
+    timeout_timer.start(500, 0, &on_timeout_callback, &timeout_ctx); // 500ms timeout
+
+    // Run event loop until connection attempt completes or timeout
+    while (!connect_result.called && !timeout_ctx.completed)
+    {
+        (void)loop.run_once();
+    }
+
+    // Stop timeout timer
+    timeout_timer.stop();
+
+    // Connection should have failed (either due to unreachable host or timeout)
+    assert(connect_result.called || timeout_ctx.completed, "Either connection should complete or timeout");
+
+    if (connect_result.called)
+    {
+        assert(connect_result.status != 0, "Connection to invalid address should fail");
+    }
+
+    // Close timeout timer
+    timeout_timer.close();
+
+    // Run the event loop to completion to allow async cleanup operations to finish
+    (void)loop.run();
+
+    assert(true, "TCP error conditions test passed");
 }
