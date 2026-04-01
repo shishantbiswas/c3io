@@ -390,7 +390,7 @@ fn void on_close_internal(uv::Handle* handle)
 *>
 fn void TcpConnection.close(&self)
 {
-    if (self.handle != null)
+    if (self.handle != null && uv::is_closing((uv::Handle*)self.handle) == 0)
     {
         uv::close((uv::Handle*)self.handle, &on_close_internal);
         // Note: Both handle and connection will be freed by the callback
