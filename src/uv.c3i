@@ -294,7 +294,7 @@ alias AfterWorkCb = fn void(Work* req, int status);
  @param loop : "Loop to initialize"
  @return "0 on success, negative error code on failure"
 *>
-fn int loop_init(Loop* loop) @extern("uv_loop_init");
+extern fn int loop_init(Loop* loop) @cname("uv_loop_init");
 
 <*
  Run the event loop.
@@ -302,39 +302,39 @@ fn int loop_init(Loop* loop) @extern("uv_loop_init");
  @param mode : "Run mode (DEFAULT, ONCE, NOWAIT)"
  @return "0 when no more active handles/requests, or mode-specific value"
 *>
-fn int run(Loop* loop, RunMode mode) @extern("uv_run");
+extern fn int run(Loop* loop, RunMode mode) @cname("uv_run");
 
 <*
  Stop the event loop.
  @param loop : "Event loop to stop"
 *>
-fn void stop(Loop* loop) @extern("uv_stop");
+extern fn void stop(Loop* loop) @cname("uv_stop");
 
 <*
  Close the event loop and release resources.
  @param loop : "Event loop to close"
  @return "0 on success, UV_EBUSY if there are still active handles"
 *>
-fn int loop_close(Loop* loop) @extern("uv_loop_close");
+extern fn int loop_close(Loop* loop) @cname("uv_loop_close");
 
 <*
  Create a new event loop.
  @return "Pointer to newly allocated loop, or null on error"
 *>
-fn Loop* loop_new() @extern("uv_loop_new");
+fn Loop* loop_new() @cname("uv_loop_new");
 
 <*
  Delete an event loop created with loop_new().
  @param loop : "Loop to delete"
 *>
-fn void loop_delete(Loop* loop) @extern("uv_loop_delete");
+extern fn void loop_delete(Loop* loop) @cname("uv_loop_delete");
 
 <*
  Get the default event loop.
  This is a global singleton loop.
  @return "Pointer to default loop"
 *>
-fn Loop* default_loop() @extern("uv_default_loop");
+fn Loop* default_loop() @cname("uv_default_loop");
 
 <*
  Check if the event loop is alive.
@@ -342,27 +342,27 @@ fn Loop* default_loop() @extern("uv_default_loop");
  @param loop : "Event loop"
  @return "Non-zero if alive, 0 otherwise"
 *>
-fn int loop_alive(Loop* loop) @extern("uv_loop_alive");
+extern fn int loop_alive(Loop* loop) @cname("uv_loop_alive");
 
 <*
  Get the size of a loop structure.
  @return "Size in bytes"
 *>
-fn usz loop_size() @extern("uv_loop_size");
+fn usz loop_size() @cname("uv_loop_size");
 
 <*
  Get the size of a request structure.
  @param type : "Request type"
  @return "Size in bytes"
 *>
-fn usz req_size(ReqType type) @extern("uv_req_size");
+fn usz req_size(ReqType type) @cname("uv_req_size");
 
 <*
  Update the event loop's concept of "now".
  Should be called at the start of each event loop iteration.
  @param loop : "Event loop"
 *>
-fn void update_time(Loop* loop) @extern("uv_update_time");
+extern fn void update_time(Loop* loop) @cname("uv_update_time");
 
 <*
  Get the current timestamp in milliseconds.
@@ -370,14 +370,14 @@ fn void update_time(Loop* loop) @extern("uv_update_time");
  @param loop : "Event loop"
  @return "Current time in milliseconds"
 *>
-fn ulong now(Loop* loop) @extern("uv_now");
+extern fn ulong now(Loop* loop) @cname("uv_now");
 
 <*
  Get high-resolution time in nanoseconds.
  Not affected by time adjustments; suitable for measuring intervals.
  @return "Time in nanoseconds"
 *>
-fn ulong hrtime() @extern("uv_hrtime");
+extern fn ulong hrtime() @cname("uv_hrtime");
 
 // ============================================================================
 // Handle Functions
@@ -403,7 +403,7 @@ macro void* alloc_handle($Type, type)
  @param type : "Handle type"
  @return "Size in bytes"
 *>
-fn usz handle_size(HandleType type) @extern("uv_handle_size");
+fn usz handle_size(HandleType type) @cname("uv_handle_size");
 
 <*
  Close a handle.
@@ -411,7 +411,7 @@ fn usz handle_size(HandleType type) @extern("uv_handle_size");
  @param handle : "Handle to close"
  @param cb : "Optional callback to call when close completes"
 *>
-fn void close(Handle* handle, CloseCb cb) @extern("uv_close");
+extern fn void close(Handle* handle, CloseCb cb) @cname("uv_close");
 
 <*
  Check if a handle is active.
@@ -419,7 +419,7 @@ fn void close(Handle* handle, CloseCb cb) @extern("uv_close");
  @param handle : "Handle to check"
  @return "Non-zero if active, 0 otherwise"
 *>
-fn int is_active(Handle* handle) @extern("uv_is_active");
+extern fn int is_active(Handle* handle) @cname("uv_is_active");
 
 <*
  <<<<<<< HEAD
@@ -427,7 +427,7 @@ fn int is_active(Handle* handle) @extern("uv_is_active");
  @param handle : "Handle to check"
  @return "Non-zero if handle is closing/closed, 0 otherwise"
 *>
-fn int is_closing(Handle* handle) @extern("uv_is_closing");
+extern fn int is_closing(Handle* handle) @cname("uv_is_closing");
 
 <*
  Walk callback type - called for each handle in the loop.
@@ -443,7 +443,7 @@ alias WalkCb = fn void(Handle* handle, void* arg);
  @param walk_cb : "Callback to call for each handle"
  @param arg : "User data to pass to callback"
 *>
-fn void walk(Loop* loop, WalkCb walk_cb, void* arg) @extern("uv_walk");
+extern fn void walk(Loop* loop, WalkCb walk_cb, void* arg) @cname("uv_walk");
 
 <*
  =======
@@ -473,35 +473,35 @@ macro void* handle_get($Type, handle)
  @param handle : "Handle"
  @param data : "User data pointer"
 *>
-fn void handle_set_data(Handle* handle, void* data) @extern("uv_handle_set_data");
+extern fn void handle_set_data(Handle* handle, void* data) @cname("uv_handle_set_data");
 
 <*
  Get user data associated with a handle (internal).
  @param handle : "Handle"
  @return "User data pointer"
 *>
-fn void* handle_get_data(Handle* handle) @extern("uv_handle_get_data");
+extern fn void* handle_get_data(Handle* handle) @cname("uv_handle_get_data");
 
 <*
  Reference a handle.
  References prevent the event loop from exiting while the handle is active.
  @param handle : "Handle to reference"
 *>
-fn void ref(Handle* handle) @extern("uv_ref");
+extern fn void ref(Handle* handle) @cname("uv_ref");
 
 <*
  Unreference a handle.
  Unreferenced handles don't prevent the event loop from exiting.
  @param handle : "Handle to unreference"
 *>
-fn void unref(Handle* handle) @extern("uv_unref");
+extern fn void unref(Handle* handle) @cname("uv_unref");
 
 <*
  Check if a handle is referenced.
  @param handle : "Handle to check"
  @return "Non-zero if referenced, 0 otherwise"
 *>
-fn int has_ref(Handle* handle) @extern("uv_has_ref");
+extern fn int has_ref(Handle* handle) @cname("uv_has_ref");
 
 // ============================================================================
 // Request Functions
@@ -533,14 +533,14 @@ macro void* req_get($Type, req)
  @param req : "Request"
  @param data : "User data pointer"
 *>
-fn void req_set_data(Req* req, void* data) @extern("uv_req_set_data");
+extern fn void req_set_data(Req* req, void* data) @cname("uv_req_set_data");
 
 <*
  Get user data associated with a request (internal).
  @param req : "Request"
  @return "User data pointer"
 *>
-fn void* req_get_data(Req* req) @extern("uv_req_get_data");
+extern fn void* req_get_data(Req* req) @cname("uv_req_get_data");
 
 // ============================================================================
 // TCP Functions
@@ -552,7 +552,7 @@ fn void* req_get_data(Req* req) @extern("uv_req_get_data");
  @param tcp : "TCP handle to initialize"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_init(Loop* loop, Tcp* tcp) @extern("uv_tcp_init");
+extern fn int tcp_init(Loop* loop, Tcp* tcp) @cname("uv_tcp_init");
 
 <*
  Connect to a TCP server.
@@ -562,7 +562,7 @@ fn int tcp_init(Loop* loop, Tcp* tcp) @extern("uv_tcp_init");
  @param cb : "Callback called when connection completes"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_connect(Connect* req, Tcp* tcp, Sockaddr* addr, ConnectCb cb) @extern("uv_tcp_connect");
+extern fn int tcp_connect(Connect* req, Tcp* tcp, Sockaddr* addr, ConnectCb cb) @cname("uv_tcp_connect");
 
 <*
  Bind a TCP handle to an address.
@@ -571,7 +571,7 @@ fn int tcp_connect(Connect* req, Tcp* tcp, Sockaddr* addr, ConnectCb cb) @extern
  @param flags : "Bind flags (0 for default)"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_bind(Tcp* tcp, Sockaddr* addr, uint flags) @extern("uv_tcp_bind");
+extern fn int tcp_bind(Tcp* tcp, Sockaddr* addr, uint flags) @cname("uv_tcp_bind");
 
 <*
  Enable or disable Nagle's algorithm on a TCP handle.
@@ -579,7 +579,7 @@ fn int tcp_bind(Tcp* tcp, Sockaddr* addr, uint flags) @extern("uv_tcp_bind");
  @param enable : "1 to disable Nagle (enable no-delay), 0 to enable Nagle"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_nodelay(Tcp* tcp, int enable) @extern("uv_tcp_nodelay");
+extern fn int tcp_nodelay(Tcp* tcp, int enable) @cname("uv_tcp_nodelay");
 
 <*
  Enable or disable TCP keepalive.
@@ -588,7 +588,7 @@ fn int tcp_nodelay(Tcp* tcp, int enable) @extern("uv_tcp_nodelay");
  @param delay : "Keepalive delay in seconds (only used if enable is 1)"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_keepalive(Tcp* tcp, int enable, uint delay) @extern("uv_tcp_keepalive");
+extern fn int tcp_keepalive(Tcp* tcp, int enable, uint delay) @cname("uv_tcp_keepalive");
 
 <*
  Get the local address to which the TCP handle is bound.
@@ -597,7 +597,7 @@ fn int tcp_keepalive(Tcp* tcp, int enable, uint delay) @extern("uv_tcp_keepalive
  @param namelen : "Input: buffer size, Output: actual size"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_getsockname(Tcp* tcp, Sockaddr* name, int* namelen) @extern("uv_tcp_getsockname");
+extern fn int tcp_getsockname(Tcp* tcp, Sockaddr* name, int* namelen) @cname("uv_tcp_getsockname");
 
 <*
  Get the remote peer address of the TCP connection.
@@ -606,7 +606,7 @@ fn int tcp_getsockname(Tcp* tcp, Sockaddr* name, int* namelen) @extern("uv_tcp_g
  @param namelen : "Input: buffer size, Output: actual size"
  @return "0 on success, negative error code on failure"
 *>
-fn int tcp_getpeername(Tcp* tcp, Sockaddr* name, int* namelen) @extern("uv_tcp_getpeername");
+extern fn int tcp_getpeername(Tcp* tcp, Sockaddr* name, int* namelen) @cname("uv_tcp_getpeername");
 
 <*
  Listen for incoming connections.
@@ -615,7 +615,7 @@ fn int tcp_getpeername(Tcp* tcp, Sockaddr* name, int* namelen) @extern("uv_tcp_g
  @param cb : "Callback called when a new connection arrives"
  @return "0 on success, negative error code on failure"
 *>
-fn int listen(Stream* stream, int backlog, ConnectionCb cb) @extern("uv_listen");
+extern fn int listen(Stream* stream, int backlog, ConnectionCb cb) @cname("uv_listen");
 
 <*
  Accept an incoming connection.
@@ -623,7 +623,7 @@ fn int listen(Stream* stream, int backlog, ConnectionCb cb) @extern("uv_listen")
  @param client : "Client stream handle (must be initialized)"
  @return "0 on success, negative error code on failure"
 *>
-fn int accept(Stream* server, Stream* client) @extern("uv_accept");
+extern fn int accept(Stream* server, Stream* client) @cname("uv_accept");
 
 <*
  Start reading from a stream.
@@ -632,14 +632,14 @@ fn int accept(Stream* server, Stream* client) @extern("uv_accept");
  @param read_cb : "Callback called when data is available"
  @return "0 on success, negative error code on failure"
 *>
-fn int read_start(Stream* stream, AllocCb alloc_cb, ReadCb read_cb) @extern("uv_read_start");
+extern fn int read_start(Stream* stream, AllocCb alloc_cb, ReadCb read_cb) @cname("uv_read_start");
 
 <*
  Stop reading from a stream.
  @param stream : "Stream to stop reading from"
  @return "0 on success, negative error code on failure"
 *>
-fn int read_stop(Stream* stream) @extern("uv_read_stop");
+extern fn int read_stop(Stream* stream) @cname("uv_read_stop");
 
 <*
  Write data to a stream.
@@ -650,7 +650,7 @@ fn int read_stop(Stream* stream) @extern("uv_read_stop");
  @param cb : "Callback called when write completes"
  @return "0 on success, negative error code on failure"
 *>
-fn int write(Write* req, Stream* stream, Buf* bufs, uint nbufs, WriteCb cb) @extern("uv_write");
+extern fn int write(Write* req, Stream* stream, Buf* bufs, uint nbufs, WriteCb cb) @cname("uv_write");
 
 <*
  Shutdown the write side of a stream.
@@ -659,7 +659,7 @@ fn int write(Write* req, Stream* stream, Buf* bufs, uint nbufs, WriteCb cb) @ext
  @param cb : "Callback called when shutdown completes"
  @return "0 on success, negative error code on failure"
 *>
-fn int shutdown(Shutdown* req, Stream* stream, WriteCb cb) @extern("uv_shutdown");
+extern fn int shutdown(Shutdown* req, Stream* stream, WriteCb cb) @cname("uv_shutdown");
 
 // ============================================================================
 // Address Functions
@@ -671,7 +671,7 @@ fn int shutdown(Shutdown* req, Stream* stream, WriteCb cb) @extern("uv_shutdown"
  @param addr : "Output sockaddr_in structure"
  @return "0 on success, negative error code on failure"
 *>
-fn int ip4_addr(char* ip, int port, Sockaddr_in* addr) @extern("uv_ip4_addr");
+extern fn int ip4_addr(char* ip, int port, Sockaddr_in* addr) @cname("uv_ip4_addr");
 
 <*
  Convert IPv6 address string to binary form.
@@ -679,7 +679,7 @@ fn int ip4_addr(char* ip, int port, Sockaddr_in* addr) @extern("uv_ip4_addr");
  @param addr : "Output sockaddr_in6 structure"
  @return "0 on success, negative error code on failure"
 *>
-fn int ip6_addr(char* ip, int port, Sockaddr_in6* addr) @extern("uv_ip6_addr");
+extern fn int ip6_addr(char* ip, int port, Sockaddr_in6* addr) @cname("uv_ip6_addr");
 
 <*
  Convert IPv4 binary address to string form.
@@ -688,7 +688,7 @@ fn int ip6_addr(char* ip, int port, Sockaddr_in6* addr) @extern("uv_ip6_addr");
  @param size : "Size of output buffer"
  @return "0 on success, negative error code on failure"
 *>
-fn int ip4_name(Sockaddr_in* src, char* dst, usz size) @extern("uv_ip4_name");
+extern fn int ip4_name(Sockaddr_in* src, char* dst, usz size) @cname("uv_ip4_name");
 
 <*
  Convert IPv6 binary address to string form.
@@ -697,7 +697,7 @@ fn int ip4_name(Sockaddr_in* src, char* dst, usz size) @extern("uv_ip4_name");
  @param size : "Size of output buffer"
  @return "0 on success, negative error code on failure"
 *>
-fn int ip6_name(Sockaddr_in6* src, char* dst, usz size) @extern("uv_ip6_name");
+extern fn int ip6_name(Sockaddr_in6* src, char* dst, usz size) @cname("uv_ip6_name");
 
 // ============================================================================
 // Error Functions
@@ -708,14 +708,14 @@ fn int ip6_name(Sockaddr_in6* src, char* dst, usz size) @extern("uv_ip6_name");
  @param err : "Error code"
  @return "Error name string"
 *>
-fn char* err_name(int err) @extern("uv_err_name");
+fn char* err_name(int err) @cname("uv_err_name");
 
 <*
  Get the description of an error code.
  @param err : "Error code"
  @return "Error description string"
 *>
-fn char* strerror(int err) @extern("uv_strerror");
+fn char* strerror(int err) @cname("uv_strerror");
 
 // ============================================================================
 // Error Codes
@@ -797,7 +797,7 @@ macro alloc_req($ReqType, req_type)
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_open(Loop* loop, Fs* req, char* path, int flags, int mode, FsCb cb) @extern("uv_fs_open");
+extern fn int fs_open(Loop* loop, Fs* req, char* path, int flags, int mode, FsCb cb) @cname("uv_fs_open");
 
 <*
  Read from a file asynchronously.
@@ -810,7 +810,7 @@ fn int fs_open(Loop* loop, Fs* req, char* path, int flags, int mode, FsCb cb) @e
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_read(Loop* loop, Fs* req, int file, Buf* bufs, uint nbufs, long offset, FsCb cb) @extern("uv_fs_read");
+extern fn int fs_read(Loop* loop, Fs* req, int file, Buf* bufs, uint nbufs, long offset, FsCb cb) @cname("uv_fs_read");
 
 <*
  Write to a file asynchronously.
@@ -823,7 +823,7 @@ fn int fs_read(Loop* loop, Fs* req, int file, Buf* bufs, uint nbufs, long offset
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_write(Loop* loop, Fs* req, int file, Buf* bufs, uint nbufs, long offset, FsCb cb) @extern("uv_fs_write");
+extern fn int fs_write(Loop* loop, Fs* req, int file, Buf* bufs, uint nbufs, long offset, FsCb cb) @cname("uv_fs_write");
 
 <*
  Sync file data to disk asynchronously.
@@ -834,7 +834,7 @@ fn int fs_write(Loop* loop, Fs* req, int file, Buf* bufs, uint nbufs, long offse
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_fsync(Loop* loop, Fs* req, int file, FsCb cb) @extern("uv_fs_fsync");
+extern fn int fs_fsync(Loop* loop, Fs* req, int file, FsCb cb) @cname("uv_fs_fsync");
 
 <*
  Close a file asynchronously.
@@ -844,7 +844,7 @@ fn int fs_fsync(Loop* loop, Fs* req, int file, FsCb cb) @extern("uv_fs_fsync");
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_close(Loop* loop, Fs* req, int file, FsCb cb) @extern("uv_fs_close");
+extern fn int fs_close(Loop* loop, Fs* req, int file, FsCb cb) @cname("uv_fs_close");
 
 <*
  Get file statistics asynchronously.
@@ -854,7 +854,7 @@ fn int fs_close(Loop* loop, Fs* req, int file, FsCb cb) @extern("uv_fs_close");
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_stat(Loop* loop, Fs* req, char* path, FsCb cb) @extern("uv_fs_stat");
+extern fn int fs_stat(Loop* loop, Fs* req, char* path, FsCb cb) @cname("uv_fs_stat");
 
 <*
  Truncate or extend a file asynchronously.
@@ -865,7 +865,7 @@ fn int fs_stat(Loop* loop, Fs* req, char* path, FsCb cb) @extern("uv_fs_stat");
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_ftruncate(Loop* loop, Fs* req, int file, long offset, FsCb cb) @extern("uv_fs_ftruncate");
+extern fn int fs_ftruncate(Loop* loop, Fs* req, int file, long offset, FsCb cb) @cname("uv_fs_ftruncate");
 
 <*
  Create a directory asynchronously.
@@ -876,27 +876,27 @@ fn int fs_ftruncate(Loop* loop, Fs* req, int file, long offset, FsCb cb) @extern
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_mkdir(Loop* loop, Fs* req, char* path, int mode, FsCb cb) @extern("uv_fs_mkdir");
+extern fn int fs_mkdir(Loop* loop, Fs* req, char* path, int mode, FsCb cb) @cname("uv_fs_mkdir");
 
 <*
  Get the result of a filesystem operation.
  @param req : "Filesystem request"
  @return "Result value (e.g., file descriptor for open, bytes read/written, or negative error code)"
 *>
-fn isz fs_req_result(Fs* req) @extern("uv_fs_get_result");
+fn isz fs_req_result(Fs* req) @cname("uv_fs_get_result");
 
 <*
  Get the stat buffer from a filesystem request.
  @param req : "Filesystem request (after stat operation)"
  @return "Pointer to FileStat structure, or null on error"
 *>
-fn FileStat* fs_req_statbuf(Fs* req) @extern("uv_fs_get_statbuf");
+fn FileStat* fs_req_statbuf(Fs* req) @cname("uv_fs_get_statbuf");
 
 <*
  Clean up filesystem request resources.
  @param req : "Filesystem request to clean up"
 *>
-fn void fs_req_cleanup(Fs* req) @extern("uv_fs_req_cleanup");
+extern fn void fs_req_cleanup(Fs* req) @cname("uv_fs_req_cleanup");
 
 <*
  Scan a directory asynchronously.
@@ -907,7 +907,7 @@ fn void fs_req_cleanup(Fs* req) @extern("uv_fs_req_cleanup");
  @param cb : "Completion callback"
  @return "0 on success, negative error code on failure"
 *>
-fn int fs_scandir(Loop* loop, Fs* req, char* path, int flags, FsCb cb) @extern("uv_fs_scandir");
+extern fn int fs_scandir(Loop* loop, Fs* req, char* path, int flags, FsCb cb) @cname("uv_fs_scandir");
 
 <*
  Get the next entry from a scandir operation.
@@ -915,7 +915,7 @@ fn int fs_scandir(Loop* loop, Fs* req, char* path, int flags, FsCb cb) @extern("
  @param ent : "Output directory entry"
  @return "UV_EOF when no more entries, 0 on success, negative error code on failure"
 *>
-fn int fs_scandir_next(Fs* req, Dirent* ent) @extern("uv_fs_scandir_next");
+extern fn int fs_scandir_next(Fs* req, Dirent* ent) @cname("uv_fs_scandir_next");
 
 // ============================================================================
 // UDP Functions
@@ -927,7 +927,7 @@ fn int fs_scandir_next(Fs* req, Dirent* ent) @extern("uv_fs_scandir_next");
  @param udp : "UDP handle to initialize"
  @return "0 on success, negative error code on failure"
 *>
-fn int udp_init(Loop* loop, Udp* udp) @extern("uv_udp_init");
+extern fn int udp_init(Loop* loop, Udp* udp) @cname("uv_udp_init");
 
 <*
  Bind a UDP handle to an address.
@@ -936,7 +936,7 @@ fn int udp_init(Loop* loop, Udp* udp) @extern("uv_udp_init");
  @param flags : "Bind flags (0 for default, UV_UDP_REUSEADDR to reuse address)"
  @return "0 on success, negative error code on failure"
 *>
-fn int udp_bind(Udp* udp, Sockaddr* addr, uint flags) @extern("uv_udp_bind");
+extern fn int udp_bind(Udp* udp, Sockaddr* addr, uint flags) @cname("uv_udp_bind");
 
 <*
  Send data over UDP.
@@ -948,7 +948,7 @@ fn int udp_bind(Udp* udp, Sockaddr* addr, uint flags) @extern("uv_udp_bind");
  @param cb : "Callback called when send completes"
  @return "0 on success, negative error code on failure"
 *>
-fn int udp_send(UdpSend* req, Udp* udp, Buf* bufs, uint nbufs, Sockaddr* addr, UdpSendCb cb) @extern("uv_udp_send");
+extern fn int udp_send(UdpSend* req, Udp* udp, Buf* bufs, uint nbufs, Sockaddr* addr, UdpSendCb cb) @cname("uv_udp_send");
 
 <*
  Start receiving data on a UDP handle.
@@ -957,14 +957,14 @@ fn int udp_send(UdpSend* req, Udp* udp, Buf* bufs, uint nbufs, Sockaddr* addr, U
  @param recv_cb : "Callback called when data is received"
  @return "0 on success, negative error code on failure"
 *>
-fn int udp_recv_start(Udp* udp, AllocCb alloc_cb, UdpRecvCb recv_cb) @extern("uv_udp_recv_start");
+extern fn int udp_recv_start(Udp* udp, AllocCb alloc_cb, UdpRecvCb recv_cb) @cname("uv_udp_recv_start");
 
 <*
  Stop receiving data on a UDP handle.
  @param udp : "UDP handle"
  @return "0 on success, negative error code on failure"
 *>
-fn int udp_recv_stop(Udp* udp) @extern("uv_udp_recv_stop");
+extern fn int udp_recv_stop(Udp* udp) @cname("uv_udp_recv_stop");
 
 <*
  Get the local address to which the UDP handle is bound.
@@ -973,7 +973,7 @@ fn int udp_recv_stop(Udp* udp) @extern("uv_udp_recv_stop");
  @param namelen : "Input: buffer size, Output: actual size"
  @return "0 on success, negative error code on failure"
 *>
-fn int udp_getsockname(Udp* udp, Sockaddr* name, int* namelen) @extern("uv_udp_getsockname");
+extern fn int udp_getsockname(Udp* udp, Sockaddr* name, int* namelen) @cname("uv_udp_getsockname");
 
 <*
  Try to send data over UDP without queuing.
@@ -984,7 +984,7 @@ fn int udp_getsockname(Udp* udp, Sockaddr* name, int* namelen) @extern("uv_udp_g
  @param addr : "Destination address"
  @return "Number of bytes sent on success, negative error code on failure"
 *>
-fn int udp_try_send(Udp* udp, Buf* bufs, uint nbufs, Sockaddr* addr) @extern("uv_udp_try_send");
+extern fn int udp_try_send(Udp* udp, Buf* bufs, uint nbufs, Sockaddr* addr) @cname("uv_udp_try_send");
 
 // UDP flags
 const uint UV_UDP_REUSEADDR = 4; // Allow reusing addresses
@@ -999,7 +999,7 @@ const uint UV_UDP_REUSEADDR = 4; // Allow reusing addresses
   @param prepare : "Prepare handle to initialize"
   @return "0 on success, negative error code on failure"
 */
-fn int prepare_init(Loop* loop, Prepare* prepare) @extern("uv_prepare_init");
+extern fn int prepare_init(Loop* loop, Prepare* prepare) @cname("uv_prepare_init");
 
 /*
   Start a prepare handle.
@@ -1007,14 +1007,14 @@ fn int prepare_init(Loop* loop, Prepare* prepare) @extern("uv_prepare_init");
   @param cb : "Callback called before I/O polling"
   @return "0 on success, negative error code on failure"
 */
-fn int prepare_start(Prepare* prepare, PrepareCb cb) @extern("uv_prepare_start");
+extern fn int prepare_start(Prepare* prepare, PrepareCb cb) @cname("uv_prepare_start");
 
 /*
   Stop a prepare handle.
   @param prepare : "Prepare handle"
   @return "0 on success, negative error code on failure"
 */
-fn int prepare_stop(Prepare* prepare) @extern("uv_prepare_stop");
+extern fn int prepare_stop(Prepare* prepare) @cname("uv_prepare_stop");
 
 // ============================================================================
 // Check Functions
@@ -1026,7 +1026,7 @@ fn int prepare_stop(Prepare* prepare) @extern("uv_prepare_stop");
   @param check : "Check handle to initialize"
   @return "0 on success, negative error code on failure"
 */
-fn int check_init(Loop* loop, Check* check) @extern("uv_check_init");
+extern fn int check_init(Loop* loop, Check* check) @cname("uv_check_init");
 
 /*
   Start a check handle.
@@ -1034,14 +1034,14 @@ fn int check_init(Loop* loop, Check* check) @extern("uv_check_init");
   @param cb : "Callback called after I/O polling"
   @return "0 on success, negative error code on failure"
 */
-fn int check_start(Check* check, CheckCb cb) @extern("uv_check_start");
+extern fn int check_start(Check* check, CheckCb cb) @cname("uv_check_start");
 
 /*
   Stop a check handle.
   @param check : "Check handle"
   @return "0 on success, negative error code on failure"
 */
-fn int check_stop(Check* check) @extern("uv_check_stop");
+extern fn int check_stop(Check* check) @cname("uv_check_stop");
 
 // ============================================================================
 // Idle Functions
@@ -1053,7 +1053,7 @@ fn int check_stop(Check* check) @extern("uv_check_stop");
   @param idle : "Idle handle to initialize"
   @return "0 on success, negative error code on failure"
 */
-fn int idle_init(Loop* loop, Idle* idle) @extern("uv_idle_init");
+extern fn int idle_init(Loop* loop, Idle* idle) @cname("uv_idle_init");
 
 /*
   Start an idle handle.
@@ -1061,14 +1061,14 @@ fn int idle_init(Loop* loop, Idle* idle) @extern("uv_idle_init");
   @param cb : "Callback called when loop is idle"
   @return "0 on success, negative error code on failure"
 */
-fn int idle_start(Idle* idle, IdleCb cb) @extern("uv_idle_start");
+extern fn int idle_start(Idle* idle, IdleCb cb) @cname("uv_idle_start");
 
 /*
   Stop an idle handle.
   @param idle : "Idle handle"
   @return "0 on success, negative error code on failure"
 */
-fn int idle_stop(Idle* idle) @extern("uv_idle_stop");
+extern fn int idle_stop(Idle* idle) @cname("uv_idle_stop");
 
 // ============================================================================
 // Async Functions
@@ -1081,7 +1081,7 @@ fn int idle_stop(Idle* idle) @extern("uv_idle_stop");
   @param cb : "Callback called when async is sent"
   @return "0 on success, negative error code on failure"
 */
-fn int async_init(Loop* loop, Async* async, AsyncCb cb) @extern("uv_async_init");
+extern fn int async_init(Loop* loop, Async* async, AsyncCb cb) @cname("uv_async_init");
 
 /*
   Send a signal to an async handle.
@@ -1089,7 +1089,7 @@ fn int async_init(Loop* loop, Async* async, AsyncCb cb) @extern("uv_async_init")
   @param async : "Async handle to send to"
   @return "0 on success, negative error code on failure"
 */
-fn int async_send(Async* async) @extern("uv_async_send");
+extern fn int async_send(Async* async) @cname("uv_async_send");
 
 // ============================================================================
 // Poll Functions
@@ -1102,7 +1102,7 @@ fn int async_send(Async* async) @extern("uv_async_send");
   @param fd : "File descriptor to poll"
   @return "0 on success, negative error code on failure"
 */
-fn int poll_init(Loop* loop, Poll* poll, int fd) @extern("uv_poll_init");
+extern fn int poll_init(Loop* loop, Poll* poll, int fd) @cname("uv_poll_init");
 
 /*
   Start polling a file descriptor.
@@ -1111,14 +1111,14 @@ fn int poll_init(Loop* loop, Poll* poll, int fd) @extern("uv_poll_init");
   @param cb : "Callback called when events occur"
   @return "0 on success, negative error code on failure"
 */
-fn int poll_start(Poll* poll, int events, PollCb cb) @extern("uv_poll_start");
+extern fn int poll_start(Poll* poll, int events, PollCb cb) @cname("uv_poll_start");
 
 /*
   Stop polling.
   @param poll : "Poll handle"
   @return "0 on success, negative error code on failure"
 */
-fn int poll_stop(Poll* poll) @extern("uv_poll_stop");
+extern fn int poll_stop(Poll* poll) @cname("uv_poll_stop");
 
 // ============================================================================
 // Signal Functions
@@ -1130,7 +1130,7 @@ fn int poll_stop(Poll* poll) @extern("uv_poll_stop");
   @param signal : "Signal handle to initialize"
   @return "0 on success, negative error code on failure"
 */
-fn int signal_init(Loop* loop, Signal* signal) @extern("uv_signal_init");
+extern fn int signal_init(Loop* loop, Signal* signal) @cname("uv_signal_init");
 
 /*
   Start listening for a signal.
@@ -1139,14 +1139,14 @@ fn int signal_init(Loop* loop, Signal* signal) @extern("uv_signal_init");
   @param signum : "Signal number"
   @return "0 on success, negative error code on failure"
 */
-fn int signal_start(Signal* signal, SignalCb cb, int signum) @extern("uv_signal_start");
+extern fn int signal_start(Signal* signal, SignalCb cb, int signum) @cname("uv_signal_start");
 
 /*
   Stop listening for signals.
   @param signal : "Signal handle"
   @return "0 on success, negative error code on failure"
 */
-fn int signal_stop(Signal* signal) @extern("uv_signal_stop");
+extern fn int signal_stop(Signal* signal) @cname("uv_signal_stop");
 
 // ============================================================================
 // TTY Functions
@@ -1160,7 +1160,7 @@ fn int signal_stop(Signal* signal) @extern("uv_signal_stop");
   @param readable : "Whether TTY should be readable (1) or writable (0)"
   @return "0 on success, negative error code on failure"
 */
-fn int tty_init(Loop* loop, Tty* tty, int fd, int readable) @extern("uv_tty_init");
+extern fn int tty_init(Loop* loop, Tty* tty, int fd, int readable) @cname("uv_tty_init");
 
 /*
   Set TTY mode.
@@ -1168,14 +1168,14 @@ fn int tty_init(Loop* loop, Tty* tty, int fd, int readable) @extern("uv_tty_init
   @param mode : "TTY mode (0=normal, 1=raw)"
   @return "0 on success, negative error code on failure"
 */
-fn int tty_set_mode(Tty* tty, int mode) @extern("uv_tty_set_mode");
+extern fn int tty_set_mode(Tty* tty, int mode) @cname("uv_tty_set_mode");
 
 /*
   Reset TTY mode to normal.
   Should be called before program exit.
   @return "0 on success, negative error code on failure"
 */
-fn int tty_reset_mode() @extern("uv_tty_reset_mode");
+extern fn int tty_reset_mode() @cname("uv_tty_reset_mode");
 
 /*
   Get terminal window size.
@@ -1184,7 +1184,7 @@ fn int tty_reset_mode() @extern("uv_tty_reset_mode");
   @param height : "Output parameter for height"
   @return "0 on success, negative error code on failure"
 */
-fn int tty_get_winsize(Tty* tty, int* width, int* height) @extern("uv_tty_get_winsize");
+extern fn int tty_get_winsize(Tty* tty, int* width, int* height) @cname("uv_tty_get_winsize");
 
 // ============================================================================
 // FS Event Functions
@@ -1196,7 +1196,7 @@ fn int tty_get_winsize(Tty* tty, int* width, int* height) @extern("uv_tty_get_wi
   @param fs_event : "FS event handle to initialize"
   @return "0 on success, negative error code on failure"
 */
-fn int fs_event_init(Loop* loop, FSEvent* fs_event) @extern("uv_fs_event_init");
+extern fn int fs_event_init(Loop* loop, FSEvent* fs_event) @cname("uv_fs_event_init");
 
 /*
   Start watching a filesystem path.
@@ -1206,14 +1206,14 @@ fn int fs_event_init(Loop* loop, FSEvent* fs_event) @extern("uv_fs_event_init");
   @param flags : "Watch flags"
   @return "0 on success, negative error code on failure"
 */
-fn int fs_event_start(FSEvent* fs_event, FsEventCb cb, char* path, uint flags) @extern("uv_fs_event_start");
+extern fn int fs_event_start(FSEvent* fs_event, FsEventCb cb, char* path, uint flags) @cname("uv_fs_event_start");
 
 /*
   Stop watching filesystem.
   @param fs_event : "FS event handle"
   @return "0 on success, negative error code on failure"
 */
-fn int fs_event_stop(FSEvent* fs_event) @extern("uv_fs_event_stop");
+extern fn int fs_event_stop(FSEvent* fs_event) @cname("uv_fs_event_stop");
 
 // ============================================================================
 // FS Poll Functions
@@ -1225,7 +1225,7 @@ fn int fs_event_stop(FSEvent* fs_event) @extern("uv_fs_event_stop");
   @param fs_poll : "FS poll handle to initialize"
   @return "0 on success, negative error code on failure"
 */
-fn int fs_poll_init(Loop* loop, FSPoll* fs_poll) @extern("uv_fs_poll_init");
+extern fn int fs_poll_init(Loop* loop, FSPoll* fs_poll) @cname("uv_fs_poll_init");
 
 /*
   Start polling a filesystem path.
@@ -1235,14 +1235,14 @@ fn int fs_poll_init(Loop* loop, FSPoll* fs_poll) @extern("uv_fs_poll_init");
   @param interval : "Polling interval in milliseconds"
   @return "0 on success, negative error code on failure"
 */
-fn int fs_poll_start(FSPoll* fs_poll, FsPollCb callback, char* path, uint interval) @extern("uv_fs_poll_start");
+extern fn int fs_poll_start(FSPoll* fs_poll, FsPollCb callback, char* path, uint interval) @cname("uv_fs_poll_start");
 
 /*
   Stop polling filesystem.
   @param fs_poll : "FS poll handle"
   @return "0 on success, negative error code on failure"
 */
-fn int fs_poll_stop(FSPoll* fs_poll) @extern("uv_fs_poll_stop");
+extern fn int fs_poll_stop(FSPoll* fs_poll) @cname("uv_fs_poll_stop");
 
 // ============================================================================
 // Pipe Functions
@@ -1255,7 +1255,7 @@ fn int fs_poll_stop(FSPoll* fs_poll) @extern("uv_fs_poll_stop");
   @param ipc : "Whether pipe is for IPC (1) or not (0)"
   @return "0 on success, negative error code on failure"
 */
-fn int pipe_init(Loop* loop, Pipe* pipe, int ipc) @extern("uv_pipe_init");
+extern fn int pipe_init(Loop* loop, Pipe* pipe, int ipc) @cname("uv_pipe_init");
 
 /*
   Open an existing pipe file descriptor.
@@ -1263,7 +1263,7 @@ fn int pipe_init(Loop* loop, Pipe* pipe, int ipc) @extern("uv_pipe_init");
   @param file : "File descriptor"
   @return "0 on success, negative error code on failure"
 */
-fn int pipe_open(Pipe* pipe, int file) @extern("uv_pipe_open");
+extern fn int pipe_open(Pipe* pipe, int file) @cname("uv_pipe_open");
 
 /*
   Bind pipe to a Unix domain socket.
@@ -1271,7 +1271,7 @@ fn int pipe_open(Pipe* pipe, int file) @extern("uv_pipe_open");
   @param name : "Socket name"
   @return "0 on success, negative error code on failure"
 */
-fn int pipe_bind(Pipe* pipe, char* name) @extern("uv_pipe_bind");
+extern fn int pipe_bind(Pipe* pipe, char* name) @cname("uv_pipe_bind");
 
 /*
   Connect to a Unix domain socket.
@@ -1281,7 +1281,7 @@ fn int pipe_bind(Pipe* pipe, char* name) @extern("uv_pipe_bind");
   @param cb : "Connection callback"
   @return "0 on success, negative error code on failure"
 */
-fn int pipe_connect(Connect* req, Pipe* pipe, char* name, ConnectCb cb) @extern("uv_pipe_connect");
+extern fn int pipe_connect(Connect* req, Pipe* pipe, char* name, ConnectCb cb) @cname("uv_pipe_connect");
 
 /*
   Get local socket name.
@@ -1290,7 +1290,7 @@ fn int pipe_connect(Connect* req, Pipe* pipe, char* name, ConnectCb cb) @extern(
   @param size : "Buffer size"
   @return "0 on success, negative error code on failure"
 */
-fn int pipe_getsockname(Pipe* pipe, char* buffer, usz* size) @extern("uv_pipe_getsockname");
+extern fn int pipe_getsockname(Pipe* pipe, char* buffer, usz* size) @cname("uv_pipe_getsockname");
 
 /*
   Get peer socket name.
@@ -1299,7 +1299,7 @@ fn int pipe_getsockname(Pipe* pipe, char* buffer, usz* size) @extern("uv_pipe_ge
   @param size : "Buffer size"
   @return "0 on success, negative error code on failure"
 */
-fn int pipe_getpeername(Pipe* pipe, char* buffer, usz* size) @extern("uv_pipe_getpeername");
+extern fn int pipe_getpeername(Pipe* pipe, char* buffer, usz* size) @cname("uv_pipe_getpeername");
 
 // ============================================================================
 // Process Functions
@@ -1314,7 +1314,7 @@ fn int pipe_getpeername(Pipe* pipe, char* buffer, usz* size) @extern("uv_pipe_ge
   @param options : "Process options (placeholder)"
   @return "PID on success, negative error code on failure"
 */
-fn int spawn(Loop* loop, Process* process, void* options) @extern("uv_spawn");
+extern fn int spawn(Loop* loop, Process* process, void* options) @cname("uv_spawn");
 
 /*
   Send a signal to a process.
@@ -1322,14 +1322,14 @@ fn int spawn(Loop* loop, Process* process, void* options) @extern("uv_spawn");
   @param signum : "Signal number"
   @return "0 on success, negative error code on failure"
 */
-fn int process_kill(Process* process, int signum) @extern("uv_process_kill");
+extern fn int process_kill(Process* process, int signum) @cname("uv_process_kill");
 
 /*
   Get the process ID.
   @param process : "Process handle"
   @return "Process ID"
 */
-fn int process_get_pid(Process* process) @extern("uv_process_get_pid");
+extern fn int process_get_pid(Process* process) @cname("uv_process_get_pid");
 
 // ============================================================================
 // Poll Events
@@ -1350,7 +1350,7 @@ const int UV_DISCONNECT = 4; // File descriptor was disconnected (Windows only)
  @param timer : "Timer handle to initialize"
  @return "0 on success, negative error code on failure"
 *>
-fn int timer_init(Loop* loop, Timer* timer) @extern("uv_timer_init");
+extern fn int timer_init(Loop* loop, Timer* timer) @cname("uv_timer_init");
 
 <*
  Start a timer.
@@ -1360,35 +1360,35 @@ fn int timer_init(Loop* loop, Timer* timer) @extern("uv_timer_init");
  @param repeat : "Repeat interval in milliseconds (0 for one-shot)"
  @return "0 on success, negative error code on failure"
 *>
-fn int timer_start(Timer* timer, TimerCb cb, ulong timeout, ulong repeat) @extern("uv_timer_start");
+extern fn int timer_start(Timer* timer, TimerCb cb, ulong timeout, ulong repeat) @cname("uv_timer_start");
 
 <*
  Stop a timer.
  @param timer : "Timer handle"
  @return "0 on success, negative error code on failure"
 *>
-fn int timer_stop(Timer* timer) @extern("uv_timer_stop");
+extern fn int timer_stop(Timer* timer) @cname("uv_timer_stop");
 
 <*
  Restart a timer with the same timeout and repeat values.
  @param timer : "Timer handle"
  @return "0 on success, negative error code on failure"
 *>
-fn int timer_again(Timer* timer) @extern("uv_timer_again");
+extern fn int timer_again(Timer* timer) @cname("uv_timer_again");
 
 <*
  Set the repeat interval for a timer.
  @param timer : "Timer handle"
  @param repeat : "Repeat interval in milliseconds"
 *>
-fn void timer_set_repeat(Timer* timer, ulong repeat) @extern("uv_timer_set_repeat");
+extern fn void timer_set_repeat(Timer* timer, ulong repeat) @cname("uv_timer_set_repeat");
 
 <*
  Get the repeat interval for a timer.
  @param timer : "Timer handle"
  @return "Repeat interval in milliseconds"
 *>
-fn ulong timer_get_repeat(Timer* timer) @extern("uv_timer_get_repeat");
+extern fn ulong timer_get_repeat(Timer* timer) @cname("uv_timer_get_repeat");
 
 // ============================================================================
 // DNS Functions
@@ -1404,20 +1404,20 @@ fn ulong timer_get_repeat(Timer* timer) @extern("uv_timer_get_repeat");
  @param hints : "Hints for resolution (null for defaults)"
  @return "0 on success, negative error code on failure"
 *>
-fn int getaddrinfo(
+extern fn int getaddrinfo(
 	Loop* loop,
 	GetAddrInfo* req,
 	GetAddrInfoCb cb,
 	char* node,
 	char* service,
 	AddrInfo* hints
-) @extern("uv_getaddrinfo");
+) @cname("uv_getaddrinfo");
 
 <*
  Free address info structure returned by getaddrinfo.
  @param ai : "Address info structure to free"
 *>
-fn void freeaddrinfo(AddrInfo* ai) @extern("uv_freeaddrinfo");
+extern fn void freeaddrinfo(AddrInfo* ai) @cname("uv_freeaddrinfo");
 
 // ============================================================================
 // Thread Pool Functions
@@ -1437,4 +1437,4 @@ fn void freeaddrinfo(AddrInfo* ai) @extern("uv_freeaddrinfo");
  @param after_work_cb : "Callback in event loop thread after work completes"
  @return "0 on success, negative error code on failure"
 *>
-fn int queue_work(Loop* loop, Work* req, WorkCb work_cb, AfterWorkCb after_work_cb) @extern("uv_queue_work");
+extern fn int queue_work(Loop* loop, Work* req, WorkCb work_cb, AfterWorkCb after_work_cb) @cname("uv_queue_work");
